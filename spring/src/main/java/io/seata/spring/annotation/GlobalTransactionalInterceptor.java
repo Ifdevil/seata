@@ -115,7 +115,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      *            the failure handler
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
-        // 失败处理
+        // 失败处理类
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         // 是否开启全局事务
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
