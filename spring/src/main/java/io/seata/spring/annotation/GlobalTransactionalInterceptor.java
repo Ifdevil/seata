@@ -115,9 +115,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      *            the failure handler
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
+        // 失败处理
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
+        // 是否开启全局事务
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+        // 降级开关:业务侧根据连续错误数自动降级不走seata事务
         degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
