@@ -115,12 +115,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      *            the failure handler
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
-        // 失败处理.
+        // 失败处理
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         // 是否开启全局事务
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
-        // 降级开关:业务侧根据连续错误数自动降级不走seata事务
+        // 是否开启事务降级
         degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
@@ -144,14 +144,17 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
             final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
+            // 获取注解
             final GlobalTransactional globalTransactionalAnnotation =
                 getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
             boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
                 if (globalTransactionalAnnotation != null) {
+                    // GlobalTransactional 处理
                     return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
                 } else if (globalLockAnnotation != null) {
+                    // GlobalLock 处理
                     return handleGlobalLock(methodInvocation, globalLockAnnotation);
                 }
             }
@@ -181,6 +184,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         final GlobalTransactional globalTrxAnno) throws Throwable {
         boolean succeed = true;
         try {
+            // transactionalTemplate 处理具体的事务逻辑
             return transactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
                 public Object execute() throws Throwable {
@@ -195,6 +199,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     return formatMethod(methodInvocation.getMethod());
                 }
 
+                /**
+                 * 获取事务信息
+                 * @return
+                 */
                 @Override
                 public TransactionInfo getTransactionInfo() {
                     // reset the value of timeout

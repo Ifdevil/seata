@@ -54,10 +54,13 @@ public class TransactionalTemplate {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
         // 1.1 Get current transaction, if not null, the tx role is 'GlobalTransactionRole.Participant'.
+        // 获取当前事务
         GlobalTransaction tx = GlobalTransactionContext.getCurrent();
 
         // 1.2 Handle the transaction propagation.
+        // 获取事务的传播级别
         Propagation propagation = txInfo.getPropagation();
+        // 保存事务资源的类
         SuspendedResourcesHolder suspendedResourcesHolder = null;
         try {
             switch (propagation) {
@@ -110,6 +113,7 @@ public class TransactionalTemplate {
 
             // 1.3 If null, create new transaction with role 'GlobalTransactionRole.Launcher'.
             if (tx == null) {
+                // 创建事务
                 tx = GlobalTransactionContext.createNew();
             }
 
@@ -119,11 +123,13 @@ public class TransactionalTemplate {
             try {
                 // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
                 //    else do nothing. Of course, the hooks will still be triggered.
+                // 开始事务
                 beginTransaction(txInfo, tx);
 
                 Object rs;
                 try {
                     // Do Your Business
+                    // 处理真正的业务逻辑
                     rs = business.execute();
                 } catch (Throwable ex) {
                     // 3. The needed business exception to rollback.
